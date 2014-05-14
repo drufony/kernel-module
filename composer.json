@@ -1,6 +1,6 @@
 {
     "autoload": {
-        "psr-0": { "": "src/" }
+        "psr-0": { "": "src" }
     },
     "require": {
         "php": ">=5.3.3",
