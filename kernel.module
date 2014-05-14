@@ -12,7 +12,10 @@ function kernel_ctools_plugin_directory($owner, $plugin_type) {
 
 function kernel_app() {
   static $kernel;
-  if (!$kernel) {
+  if ((!$kernel) && (
+      class_exists('Symfony\Component\ClassLoader\ClassLoader') &&
+      class_exists('Symfony\Component\DependencyInjection\ContainerBuilder')
+    )) {
     $loader = require_once __DIR__ . '/app/bootstrap.php.cache';
     \Symfony\Component\Debug\Debug::enable();
 
@@ -46,43 +49,44 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request, $ty
  * Implements hook_init().
  */
 function kernel_init() {
-  $kernel = kernel_app();
-  $kernel->boot();
-  $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-  /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
-  $router = $kernel->getContainer()->get('router');
-  try {
-    $path = current_path();
-    $router->match(base_path() . $path);
-    $router_item = array(
-      'path' => $path,
-      'page_callback' => 'kernel_callback',
-      'page_arguments' => array($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST),
-      'delivery_callback' => '',
-      'tab_parent' => '',
-      'tab_root' => $path,
-      'title' => '',
-      'type' => MENU_CALLBACK,
-      'include_file' => '',
-      'href' => $path,
-      'tab_root_href' => $path,
-      'tab_parent_href' => '',
-      'access' => true,
-      'original_map' => arg(NULL, $path),
-      'map' => arg(NULL, $path),
-    );
+  if ($kernel = kernel_app()) {
+    $kernel->boot();
+    $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
+    $router = $kernel->getContainer()->get('router');
+    try {
+      $path = current_path();
+      $router->match(base_path() . $path);
+      $router_item = array(
+        'path' => $path,
+        'page_callback' => 'kernel_callback',
+        'page_arguments' => array($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST),
+        'delivery_callback' => '',
+        'tab_parent' => '',
+        'tab_root' => $path,
+        'title' => '',
+        'type' => MENU_CALLBACK,
+        'include_file' => '',
+        'href' => $path,
+        'tab_root_href' => $path,
+        'tab_parent_href' => '',
+        'access' => true,
+        'original_map' => arg(NULL, $path),
+        'map' => arg(NULL, $path),
+      );
 
-    // If the desire is to output a whole Symfony response, use:
-    //
-    // 'page_callback' => array($kernel, 'handle'),
-    // 'page_arguments' => array($request),
-    // 'delivery_callback' => 'kernel_deliver_response',
+      // If the desire is to output a whole Symfony response, use:
+      //
 
+      // $router_item['page_callback'] = array($kernel, 'handle');
+      // $router_item['page_arguments'] = array($request);
+      // $router_item['delivery_callback'] = 'kernel_deliver_response';
 
-    menu_set_item(NULL, $router_item);
-  }
-  catch (\Exception $e) {
+      menu_set_item(NULL, $router_item);
+    }
+    catch (\Exception $e) {
 
+    }
   }
 }
 
