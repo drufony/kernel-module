@@ -4,13 +4,13 @@
  * Implements hook_ctools_plugin_directory() to let the system know
  * where our task and task_handler plugins are.
  */
-function symfony_routes_ctools_plugin_directory($owner, $plugin_type) {
+function kernel_ctools_plugin_directory($owner, $plugin_type) {
   if ($owner == 'page_manager' && $plugin_type == 'task_handlers') {
     return 'plugins/' . $plugin_type;
   }
 }
 
-function symfony_routes_app() {
+function kernel_app() {
   static $kernel;
   if (!$kernel) {
     $loader = require_once __DIR__ . '/app/bootstrap.php.cache';
@@ -23,8 +23,8 @@ function symfony_routes_app() {
   return $kernel;
 }
 
-function symfony_routes_callback(\Symfony\Component\HttpFoundation\Request $request, $type = \Symfony\Component\HttpKernel\HttpKernelInterface::MASTER_REQUEST, $catch = true) {
-  $kernel = symfony_routes_app();
+function kernel_callback(\Symfony\Component\HttpFoundation\Request $request, $type = \Symfony\Component\HttpKernel\HttpKernelInterface::MASTER_REQUEST, $catch = true) {
+  $kernel = kernel_app();
   $response = $kernel->handle($request, $type, $catch);
   $kernel->terminate($request, $response);
 
@@ -45,8 +45,8 @@ function symfony_routes_callback(\Symfony\Component\HttpFoundation\Request $requ
 /**
  * Implements hook_init().
  */
-function symfony_routes_init() {
-  $kernel = symfony_routes_app();
+function kernel_init() {
+  $kernel = kernel_app();
   $kernel->boot();
   $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
   /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
@@ -56,7 +56,7 @@ function symfony_routes_init() {
     $router->match(base_path() . $path);
     $router_item = array(
       'path' => $path,
-      'page_callback' => 'symfony_routes_callback',
+      'page_callback' => 'kernel_callback',
       'page_arguments' => array($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST),
       'delivery_callback' => '',
       'tab_parent' => '',
@@ -76,7 +76,7 @@ function symfony_routes_init() {
     //
     // 'page_callback' => array($kernel, 'handle'),
     // 'page_arguments' => array($request),
-    // 'delivery_callback' => 'symfony_routes_deliver_response',
+    // 'delivery_callback' => 'kernel_deliver_response',
 
 
     menu_set_item(NULL, $router_item);
@@ -89,8 +89,8 @@ function symfony_routes_init() {
 /**
  * @see drupal_deliver_html_page
  */
-function symfony_routes_deliver_response(\Symfony\Component\HttpFoundation\Response $response) {
-  $kernel = symfony_routes_app();
+function kernel_deliver_response(\Symfony\Component\HttpFoundation\Response $response) {
+  $kernel = kernel_app();
   $router_item = menu_get_item();
   $request = $router_item['page_arguments'][0];
 

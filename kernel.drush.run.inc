@@ -7,7 +7,7 @@
 /**
  * Executes the given command in the current working directory.
  */
-function drush_symfony_routes_app_run($arguments = array()) {
+function drush_kernel_app_run($arguments = array()) {
   // Append all the command line options (--option and -o).
   foreach ($_SERVER['argv'] as $index => $arg) {
     if ($arg[0] == '-') {
@@ -16,7 +16,7 @@ function drush_symfony_routes_app_run($arguments = array()) {
   }
 
   // Remove any invalid Composer options to construct the final arguments.
-  $options = drush_symfony_routes_app_get_options(isset($arguments[0]) ? $arguments[0] : 'list');
+  $options = drush_kernel_app_get_options(isset($arguments[0]) ? $arguments[0] : 'list');
   $args = array('app');
   foreach ($arguments as $index => $arg) {
     // Only act on options.
@@ -47,7 +47,7 @@ function drush_symfony_routes_app_run($arguments = array()) {
   set_time_limit(0);
 
   $loader = require_once __DIR__.'/app/bootstrap.php.cache';
-  require_once __DIR__.'/app/AppKernel.php';
+  require_once __DIR__ . '/app/AppKernel.php';
 
   $input = new \Symfony\Component\Console\Input\ArgvInput();
   $env = $input->getParameterOption(array('--env', '-e'), getenv('SYMFONY_ENV') ?: 'dev');
@@ -77,7 +77,7 @@ function drush_symfony_routes_app_run($arguments = array()) {
  * @return array
  *   A list of valid options for the given command.
  */
-function drush_symfony_routes_app_get_options($command = 'list') {
+function drush_kernel_app_get_options($command = 'list') {
   static $commands = array();
 
   // Retrieve all the commands available from Composer.

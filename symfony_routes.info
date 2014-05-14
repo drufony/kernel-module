@@ -1,3 +1,0 @@
-name = Symfony Routes
-core = 7.x
-dependencies[] = composer_manager

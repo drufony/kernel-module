@@ -9,7 +9,7 @@
 /**
  * Implementation of hook_drush_command().
  */
-function symfony_routes_drush_command() {
+function kernel_drush_command() {
   $items['app'] = array(
     'description' => 'Perform package management and dependency tracking of your projects and libraries.',
     'arguments' => array(
@@ -31,7 +31,7 @@ function symfony_routes_drush_command() {
  * @param $command
  *   The Composer command we are to execute.
  */
-function drush_symfony_routes_app($command = '') {
+function drush_kernel_app($command = '') {
   // Make sure the PHP requirements are met.
   $php = '5.3.2';
   $current = phpversion();
@@ -46,8 +46,8 @@ function drush_symfony_routes_app($command = '') {
 
   // Include the run in a different file so that PHP versions < 5.3 do not fail
   // parsing the file.
-  require_once(dirname(__FILE__) . '/symfony_routes.drush.run.inc');
+  require_once(dirname(__FILE__) . '/kernel.drush.run.inc');
 
   // Run the Composer command using the given function arguments.
-  return drush_symfony_routes_app_run(func_get_args());
+  return drush_kernel_app_run(func_get_args());
 }
