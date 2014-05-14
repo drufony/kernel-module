@@ -1,0 +1,113 @@
+<?php
+
+/**
+ * Implements hook_ctools_plugin_directory() to let the system know
+ * where our task and task_handler plugins are.
+ */
+function symfony_routes_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'page_manager' && $plugin_type == 'task_handlers') {
+    return 'plugins/' . $plugin_type;
+  }
+}
+
+function symfony_routes_app() {
+  static $kernel;
+  if (!$kernel) {
+    $loader = require_once __DIR__ . '/app/bootstrap.php.cache';
+    \Symfony\Component\Debug\Debug::enable();
+
+    require_once __DIR__ . '/app/AppKernel.php';
+    $kernel = new AppKernel('dev', true);
+    $kernel->loadClassCache();
+  }
+  return $kernel;
+}
+
+function symfony_routes_callback(\Symfony\Component\HttpFoundation\Request $request, $type = \Symfony\Component\HttpKernel\HttpKernelInterface::MASTER_REQUEST, $catch = true) {
+  $kernel = symfony_routes_app();
+  $response = $kernel->handle($request, $type, $catch);
+  $kernel->terminate($request, $response);
+
+//  return '<pre>'.check_plain((string) $response).'</pre>';
+
+  if ($response->isForbidden()) {
+    return MENU_ACCESS_DENIED;
+  }
+  if ($response->isNotFound()) {
+    return MENU_NOT_FOUND;
+  }
+  if ($response->isRedirection()) {
+    drupal_goto($response->headers->get('location'));
+  }
+  return $response->getContent();
+}
+
+/**
+ * Implements hook_init().
+ */
+function symfony_routes_init() {
+  $kernel = symfony_routes_app();
+  $kernel->boot();
+  $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+  /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
+  $router = $kernel->getContainer()->get('router');
+  try {
+    $path = current_path();
+    $router->match(base_path() . $path);
+    $router_item = array(
+      'path' => $path,
+      'page_callback' => 'symfony_routes_callback',
+      'page_arguments' => array($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST),
+      'delivery_callback' => '',
+      'tab_parent' => '',
+      'tab_root' => $path,
+      'title' => '',
+      'type' => MENU_CALLBACK,
+      'include_file' => '',
+      'href' => $path,
+      'tab_root_href' => $path,
+      'tab_parent_href' => '',
+      'access' => true,
+      'original_map' => arg(NULL, $path),
+      'map' => arg(NULL, $path),
+    );
+
+    // If the desire is to output a whole Symfony response, use:
+    //
+    // 'page_callback' => array($kernel, 'handle'),
+    // 'page_arguments' => array($request),
+    // 'delivery_callback' => 'symfony_routes_deliver_response',
+
+
+    menu_set_item(NULL, $router_item);
+  }
+  catch (\Exception $e) {
+
+  }
+}
+
+/**
+ * @see drupal_deliver_html_page
+ */
+function symfony_routes_deliver_response(\Symfony\Component\HttpFoundation\Response $response) {
+  $kernel = symfony_routes_app();
+  $router_item = menu_get_item();
+  $request = $router_item['page_arguments'][0];
+
+  $response->send();
+  $kernel->terminate($request, $response);
+
+  module_invoke_all('exit');
+
+  // Commit the user session, if needed.
+  drupal_session_commit();
+
+  if (variable_get('cache', 0) && ($cache = drupal_page_set_cache())) {
+    drupal_serve_page_from_cache($cache);
+  }
+
+  _registry_check_code(REGISTRY_WRITE_LOOKUP_CACHE);
+  drupal_cache_system_paths();
+  module_implements_write_cache();
+  system_run_automated_cron();
+}
