@@ -32,7 +32,6 @@ function kernel_info($name = 'app') {
   return isset($cache[$name]) ? $cache[$name] : array();
 }
 
-
 /**
  * @param string $name
  * @return \Symfony\Component\HttpKernel\KernelInterface
@@ -63,10 +62,7 @@ function kernel_app($name = 'app') {
 function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
   $kernel = kernel_app();
   $response = $kernel->handle($request);
-  if (is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
-    /** @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
-    $kernel->terminate($request, $response);
-  }
+  kernel_response($response);
 
   if ($response->isForbidden()) {
     return MENU_ACCESS_DENIED;
@@ -78,6 +74,33 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
     drupal_goto(substr($response->headers->get('location'), strlen($GLOBALS['base_path'])));
   }
   return $response->getContent();
+}
+
+/**
+ * Captures the response from the page callback for use in kernel_exit().
+ */
+function kernel_response(\Symfony\Component\HttpFoundation\Response $response = NULL) {
+  $static = &drupal_static('kernel_response');
+  if (isset($response)) {
+    $static = $response;
+  }
+  else {
+    return $static;
+  }
+}
+
+/**
+ * Implements hook_exit().
+ */
+function kernel_exit() {
+  $kernel = kernel_app();
+  $response = kernel_response();
+  if ($response && is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
+    $router_item = menu_get_item();
+    $request = $router_item['page_arguments'][0];
+    /** @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
+    $kernel->terminate($request, $response);
+  }
 }
 
 /**
