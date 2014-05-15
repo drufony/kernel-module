@@ -59,8 +59,6 @@ function kernel_app($name = 'app') {
 function kernel_callback(\Symfony\Component\HttpFoundation\Request $request, $type = \Symfony\Component\HttpKernel\HttpKernelInterface::MASTER_REQUEST, $catch = true) {
   $kernel = kernel_app();
   $response = $kernel->handle($request, $type, $catch);
-
-//  return '<pre>'.check_plain((string) $response).'</pre>';
   if (is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
     /** @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
     $kernel->terminate($request, $response);
