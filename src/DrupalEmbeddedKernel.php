@@ -36,6 +36,7 @@ abstract class DrupalEmbeddedKernel extends BaseKernel
   {
     $parameters = parent::getKernelParameters();
     $parameters['kernel.drupal_root'] = DRUPAL_ROOT;
+    $parameters['kernel.conf_path'] = conf_path();
 
     return $parameters;
   }
