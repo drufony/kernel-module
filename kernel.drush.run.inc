@@ -62,8 +62,6 @@ function drush_kernel_app_run($arguments = array()) {
   // Now that Composer has run, restore the original server arguments.
   $_SERVER['argv'] = $backup;
   $_SERVER['argc'] = count($backup);
-
-  return $loader;
 }
 
 /**
