@@ -163,10 +163,6 @@ function kernel_deliver_response(\Symfony\Component\HttpFoundation\Response $res
   $request = $router_item['page_arguments'][0];
 
   $response->send();
-  if (is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
-    /** @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
-    $kernel->terminate($request, $response);
-  }
 
   module_invoke_all('exit');
 
