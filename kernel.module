@@ -73,7 +73,12 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
   if ($response->isRedirection()) {
     drupal_goto(substr($response->headers->get('location'), strlen($GLOBALS['base_path'])));
   }
-  return $response->getContent();
+  if (0 === stripos($response->headers->get('Content-Type'), 'text/html')) {
+    return $response->getContent();
+  }
+  else {
+    kernel_deliver_response($response);
+  }
 }
 
 /**
@@ -176,4 +181,5 @@ function kernel_deliver_response(\Symfony\Component\HttpFoundation\Response $res
   drupal_cache_system_paths();
   module_implements_write_cache();
   system_run_automated_cron();
+  exit();
 }
