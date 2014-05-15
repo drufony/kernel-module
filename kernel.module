@@ -59,9 +59,12 @@ function kernel_app($name = 'app') {
 function kernel_callback(\Symfony\Component\HttpFoundation\Request $request, $type = \Symfony\Component\HttpKernel\HttpKernelInterface::MASTER_REQUEST, $catch = true) {
   $kernel = kernel_app();
   $response = $kernel->handle($request, $type, $catch);
-  $kernel->terminate($request, $response);
 
 //  return '<pre>'.check_plain((string) $response).'</pre>';
+  if (is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
+    /** @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
+    $kernel->terminate($request, $response);
+  }
 
   if ($response->isForbidden()) {
     return MENU_ACCESS_DENIED;
@@ -130,7 +133,10 @@ function kernel_deliver_response(\Symfony\Component\HttpFoundation\Response $res
   $request = $router_item['page_arguments'][0];
 
   $response->send();
-  $kernel->terminate($request, $response);
+  if (is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
+    /** @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
+    $kernel->terminate($request, $response);
+  }
 
   module_invoke_all('exit');
 
