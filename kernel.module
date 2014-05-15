@@ -75,7 +75,7 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
     return MENU_NOT_FOUND;
   }
   if ($response->isRedirection()) {
-    drupal_goto($response->headers->get('location'));
+    drupal_goto(substr($response->headers->get('location'), strlen($GLOBALS['base_path'])));
   }
   return $response->getContent();
 }
