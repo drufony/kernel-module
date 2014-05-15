@@ -56,9 +56,13 @@ function kernel_app($name = 'app') {
   return $kernel;
 }
 
-function kernel_callback(\Symfony\Component\HttpFoundation\Request $request, $type = \Symfony\Component\HttpKernel\HttpKernelInterface::MASTER_REQUEST, $catch = true) {
+/**
+ * @param \Symfony\Component\HttpFoundation\Request $request
+ * @return int|string
+ */
+function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
   $kernel = kernel_app();
-  $response = $kernel->handle($request, $type, $catch);
+  $response = $kernel->handle($request);
   if (is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
     /** @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
     $kernel->terminate($request, $response);
@@ -92,7 +96,7 @@ function kernel_init() {
       $router_item = array(
         'path' => $path,
         'page_callback' => 'kernel_callback',
-        'page_arguments' => array($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST),
+        'page_arguments' => array($request),
         'delivery_callback' => '',
         'tab_parent' => '',
         'tab_root' => $path,
