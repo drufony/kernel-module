@@ -46,9 +46,6 @@ function drush_kernel_app_run($arguments = array()) {
 
   set_time_limit(0);
 
-  $loader = require_once __DIR__.'/app/bootstrap.php.cache';
-  require_once __DIR__ . '/app/AppKernel.php';
-
   $input = new \Symfony\Component\Console\Input\ArgvInput();
   $env = $input->getParameterOption(array('--env', '-e'), getenv('SYMFONY_ENV') ?: 'dev');
   $debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(array('--no-debug', '')) && $env !== 'prod';
@@ -57,7 +54,7 @@ function drush_kernel_app_run($arguments = array()) {
     \Symfony\Component\Debug\Debug::enable();
   }
 
-  $kernel = new AppKernel($env, $debug);
+  $kernel = kernel_app();
   $application = new \Symfony\Bundle\FrameworkBundle\Console\Application($kernel);
   $application->setAutoExit(false);
   $application->run($input);
@@ -83,7 +80,8 @@ function drush_kernel_app_get_options($command = 'list') {
 
   // Retrieve all the commands available from Composer.
   if (empty($commands)) {
-    $contents = file_get_contents(__DIR__ . '/app.drush.json');
+    $info = kernel_info();
+    $contents = file_get_contents($info['console list']);
     $json = json_decode($contents, TRUE);
     $commands = $json['commands'];
   }

@@ -10,18 +10,48 @@ function kernel_ctools_plugin_directory($owner, $plugin_type) {
   }
 }
 
-function kernel_app() {
-  static $kernel;
-  if ((!$kernel) && (
-      class_exists('Symfony\Component\ClassLoader\ClassLoader') &&
-      class_exists('Symfony\Component\DependencyInjection\ContainerBuilder')
-    )) {
-    $loader = require_once __DIR__ . '/app/bootstrap.php.cache';
-    \Symfony\Component\Debug\Debug::enable();
+/**
+ * @param $name
+ * @return array
+ */
+function kernel_info($name = 'app') {
+  // Use the advanced drupal_static() pattern, since this is called very often.
+  static $drupal_static_fast;
+  if (!isset($drupal_static_fast)) {
+    $drupal_static_fast['cache'] = &drupal_static(__FUNCTION__);
+  }
+  $cache = &$drupal_static_fast['cache'];
 
-    require_once __DIR__ . '/app/AppKernel.php';
-    $kernel = new AppKernel('dev', true);
-    $kernel->loadClassCache();
+  if (!isset($cache)) {
+    $cache = module_invoke_all('kernel_info');
+
+    // Allow modules to alter the element type defaults.
+    drupal_alter('kernel_info', $cache);
+  }
+
+  return isset($cache[$name]) ? $cache[$name] : array();
+}
+
+
+/**
+ * @param string $name
+ * @return \Symfony\Component\HttpKernel\KernelInterface
+ */
+function kernel_app($name = 'app') {
+  static $kernel;
+  $info = kernel_info($name);
+  if ((!$kernel) && (class_exists($info['kernel class']))) {
+    $loader = require_once $info['autoload'];
+    if ($info['debug']) {
+      \Symfony\Component\Debug\Debug::enable();
+    }
+
+    /** @var \Symfony\Component\HttpKernel\KernelInterface $kernel */
+    $kernel = new $info['kernel class']($info['environment'], $info['debug']);
+
+    foreach ($info['calls'] as $method => $args) {
+      call_user_func_array(array($kernel, $method), $args);
+    }
   }
   return $kernel;
 }
@@ -49,7 +79,8 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request, $ty
  * Implements hook_init().
  */
 function kernel_init() {
-  if ($kernel = kernel_app()) {
+  $kernel = kernel_app();
+  if ($kernel) {
     $kernel->boot();
     $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
     /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
