@@ -160,10 +160,6 @@ function kernel_init() {
  * @see drupal_deliver_html_page
  */
 function kernel_deliver_response(\Symfony\Component\HttpFoundation\Response $response) {
-  $kernel = kernel_app();
-  $router_item = menu_get_item();
-  $request = $router_item['page_arguments'][0];
-
   $response->send();
 
   module_invoke_all('exit');
