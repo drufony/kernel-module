@@ -40,7 +40,9 @@ function kernel_app($name = 'app') {
   static $kernel;
   $info = kernel_info($name);
   if ((!$kernel) && (class_exists($info['kernel class']))) {
-    $loader = require_once $info['autoload'];
+    if (file_exists($info['autoload'])) {
+      require_once $info['autoload'];
+    }
     if ($info['debug']) {
       \Symfony\Component\Debug\Debug::enable();
     }
