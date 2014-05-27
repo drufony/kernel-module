@@ -3,8 +3,18 @@
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
 
+/**
+ * Class AppKernel
+ */
 class AppKernel extends DrupalEmbeddedKernel
 {
+  /**
+   * Returns an array of bundles to register.
+   *
+   * @return Symfony\Component\HttpKernel\Bundle\BundleInterface[] An array of bundle instances.
+   *
+   * @api
+   */
     public function registerBundles()
     {
         $bundles = array(
@@ -27,6 +37,13 @@ class AppKernel extends DrupalEmbeddedKernel
         return $bundles;
     }
 
+  /**
+   * Loads the container configuration.
+   *
+   * @param LoaderInterface $loader A LoaderInterface instance
+   *
+   * @api
+   */
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         $loader->load(__DIR__.'/config/config_'.$this->getEnvironment().'.yml');
