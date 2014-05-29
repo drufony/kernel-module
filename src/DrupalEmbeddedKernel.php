@@ -14,7 +14,7 @@ abstract class DrupalEmbeddedKernel extends BaseKernel
      */
     public function getCacheDir()
     {
-        return conf_path().'/'. $this->getName() .'/'. $this->environment .'/cache';
+        return DRUPAL_ROOT . conf_path().'/'. $this->getName() .'/'. $this->environment .'/cache';
     }
 
     /**
@@ -24,7 +24,7 @@ abstract class DrupalEmbeddedKernel extends BaseKernel
      */
     public function getLogDir()
     {
-        return conf_path().'/'. $this->getName() .'/'. $this->environment .'/logs';
+        return DRUPAL_ROOT . conf_path().'/'. $this->getName() .'/'. $this->environment .'/logs';
     }
 
   /**
