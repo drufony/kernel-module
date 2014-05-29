@@ -6,7 +6,7 @@ use Composer\Autoload\ClassLoader;
 /**
  * @var ClassLoader $loader
  */
-$loader = $GLOBALS['loader'];
+$loader = ComposerAutoloaderInitComposerManager::getLoader();
 
 AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
 

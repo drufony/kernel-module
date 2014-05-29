@@ -2,3 +2,4 @@ name = Kernel
 core = 7.x
 package = Symfony
 dependencies[] = composer_manager
+files[] = src/DrupalEmbeddedKernel.php
