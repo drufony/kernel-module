@@ -1,5 +1,33 @@
 <?php
 
+/**
+ * @param \Symfony\Component\HttpFoundation\Request $request
+ * @return int|string
+ */
+function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
+  $kernel = kernel_app();
+  $response = $kernel->handle($request);
+  kernel_response($response);
+
+  if ($response->isForbidden()) {
+    return MENU_ACCESS_DENIED;
+  }
+  if ($response->isNotFound()) {
+    return MENU_NOT_FOUND;
+  }
+  if ($response->isRedirection()) {
+    $path = substr($response->headers->get('location'), strlen($GLOBALS['base_url'] . base_path()));
+    drupal_goto($path);
+  }
+  if (0 === stripos($response->headers->get('Content-Type'), 'text/html')) {
+    return $response->getContent();
+  }
+  else {
+    $GLOBALS['devel_shutdown'] = FALSE;
+    kernel_deliver_response($response);
+  }
+}
+
 function kernel_assets_callback() {
   // @todo Don't hard code assumption about kernel name.
   $name = 'app';
