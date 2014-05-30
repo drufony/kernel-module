@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Page callback that handles a Symfony request
+ *
  * @param \Symfony\Component\HttpFoundation\Request $request
  * @return int|string
  */
@@ -28,6 +30,9 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
   }
 }
 
+/**
+ * Page callback that maps bundles assets path to conf_path location.
+ */
 function kernel_assets_callback() {
   // @todo Don't hard code assumption about kernel name.
   $name = 'app';
