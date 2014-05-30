@@ -1,13 +1,17 @@
 <?php
 
 /**
- * Implements hook_ctools_plugin_directory() to let the system know
- * where our task and task_handler plugins are.
+ * Implements hook_menu().
  */
-function kernel_ctools_plugin_directory($owner, $plugin_type) {
-  if ($owner == 'page_manager' && $plugin_type == 'task_handlers') {
-    return 'plugins/' . $plugin_type;
-  }
+function kernel_menu() {
+  $items = array();
+  $items['bundles'] = array(
+    'page callback' => 'kernel_assets_callback',
+    'access callback' => TRUE,
+    'file' => 'kernel.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
 }
 
 /**
@@ -40,7 +44,9 @@ function kernel_app($name = 'app') {
   static $kernel;
   $info = kernel_info($name);
   if ((!$kernel) && (class_exists($info['kernel class']))) {
-    $loader = require_once $info['autoload'];
+    if (file_exists($info['autoload'])) {
+      require_once $info['autoload'];
+    }
     if ($info['debug']) {
       \Symfony\Component\Debug\Debug::enable();
     }
@@ -53,32 +59,6 @@ function kernel_app($name = 'app') {
     }
   }
   return $kernel;
-}
-
-/**
- * @param \Symfony\Component\HttpFoundation\Request $request
- * @return int|string
- */
-function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
-  $kernel = kernel_app();
-  $response = $kernel->handle($request);
-  kernel_response($response);
-
-  if ($response->isForbidden()) {
-    return MENU_ACCESS_DENIED;
-  }
-  if ($response->isNotFound()) {
-    return MENU_NOT_FOUND;
-  }
-  if ($response->isRedirection()) {
-    drupal_goto(substr($response->headers->get('location'), strlen($GLOBALS['base_path'])));
-  }
-  if (0 === stripos($response->headers->get('Content-Type'), 'text/html')) {
-    return $response->getContent();
-  }
-  else {
-    kernel_deliver_response($response);
-  }
 }
 
 /**
@@ -130,7 +110,7 @@ function kernel_init() {
         'tab_root' => $path,
         'title' => '',
         'type' => MENU_CALLBACK,
-        'include_file' => '',
+        'include_file' => drupal_get_path('module', 'kernel') .'/kernel.pages.inc',
         'href' => $path,
         'tab_root_href' => $path,
         'tab_parent_href' => '',
@@ -158,10 +138,6 @@ function kernel_init() {
  * @see drupal_deliver_html_page
  */
 function kernel_deliver_response(\Symfony\Component\HttpFoundation\Response $response) {
-  $kernel = kernel_app();
-  $router_item = menu_get_item();
-  $request = $router_item['page_arguments'][0];
-
   $response->send();
 
   module_invoke_all('exit');

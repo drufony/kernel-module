@@ -9,24 +9,24 @@
  */
 function drush_kernel_app_run($arguments = array()) {
   // Append all the command line options (--option and -o).
-  foreach ($_SERVER['argv'] as $index => $arg) {
-    if ($arg[0] == '-') {
-      $arguments[] = $arg;
+  foreach ($_SERVER['argv'] as $argument) {
+    if ($argument[0] == '-') {
+      $arguments[] = $argument;
     }
   }
 
   // Remove any invalid Composer options to construct the final arguments.
   $options = drush_kernel_app_get_options(isset($arguments[0]) ? $arguments[0] : 'list');
   $args = array('app');
-  foreach ($arguments as $index => $arg) {
+  foreach ($arguments as $argument) {
     // Only act on options.
-    if ($arg[0] == '-') {
+    if ($argument[0] == '-') {
       // Check if it's a valid option for the given command.
-      foreach ($options as $name => $option) {
+      foreach ($options as $option) {
         // Validate it as a shortcut or option.
-        if (stripos($arg, $option['name']) === 0 || stripos($arg, $option['shortcut']) === 0) {
+        if (stripos($argument, $option['name']) === 0 || stripos($argument, $option['shortcut']) === 0) {
           // Append it to the valid argument list.
-          $args[] = $arg;
+          $args[] = $argument;
           // Continue on with the next argument.
           continue 2;
         }
@@ -35,7 +35,7 @@ function drush_kernel_app_run($arguments = array()) {
     }
     else {
       // Append all normal arguments to the valid list.
-      $args[] = $arg;
+      $args[] = $argument;
     }
   }
 
