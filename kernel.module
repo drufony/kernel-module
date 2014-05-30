@@ -1,16 +1,6 @@
 <?php
 
 /**
- * Implements hook_ctools_plugin_directory() to let the system know
- * where our task and task_handler plugins are.
- */
-function kernel_ctools_plugin_directory($owner, $plugin_type) {
-  if ($owner == 'page_manager' && $plugin_type == 'task_handlers') {
-    return 'plugins/' . $plugin_type;
-  }
-}
-
-/**
  * Implements hook_menu().
  */
 function kernel_menu() {
