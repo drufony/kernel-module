@@ -79,6 +79,7 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
     return $response->getContent();
   }
   else {
+    $GLOBALS['devel_shutdown'] = FALSE;
     kernel_deliver_response($response);
   }
 }
