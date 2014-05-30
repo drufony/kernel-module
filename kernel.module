@@ -11,6 +11,20 @@ function kernel_ctools_plugin_directory($owner, $plugin_type) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function kernel_menu() {
+  $items = array();
+  $items['bundles'] = array(
+    'page callback' => 'kernel_assets_callback',
+    'access callback' => TRUE,
+    'file' => 'kernel.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
  * @param $name
  * @return array
  */
