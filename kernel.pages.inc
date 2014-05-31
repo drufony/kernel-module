@@ -18,8 +18,19 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
     return MENU_NOT_FOUND;
   }
   if ($response->isRedirection()) {
-    $path = substr($response->headers->get('location'), strlen($GLOBALS['base_url'] . base_path()));
-    drupal_goto($path);
+    $path = $response->headers->get('location');
+
+    // Strip $base_url if it exists.
+    if (0 === strpos($path, $GLOBALS['base_url'])) {
+      $path = substr($path, strlen($GLOBALS['base_url']));
+    }
+
+    // Strip $base_path if it exists.
+    if (0 === strpos($path, base_path())) {
+      $path = substr($path, strlen(base_path()));
+    }
+
+    drupal_goto($path, array(), $response->getStatusCode());
   }
   if (0 === stripos($response->headers->get('Content-Type'), 'text/html')) {
     return $response->getContent();
