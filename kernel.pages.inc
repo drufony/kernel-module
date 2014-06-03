@@ -52,10 +52,8 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
  * Page callback that maps bundles assets path to conf_path location.
  */
 function kernel_assets_callback() {
-  // @todo Don't hard code assumption about kernel name.
-  $name = 'app';
   $args = func_get_args();
-  array_unshift($args, DRUPAL_ROOT, conf_path(), $name, 'web', 'bundles');
+  array_unshift($args, DRUPAL_ROOT, conf_path(), 'files', 'var', 'web', 'bundles');
 
   // Create a dummy file object so we can use Drupal function to make headers.
   $file = new stdClass();
