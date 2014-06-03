@@ -14,10 +14,10 @@ abstract class DrupalEmbeddedKernel extends BaseKernel
      */
     public function getCacheDir()
     {
-        $cache_dir = drupal_realpath('public://var/' .$this->getName() .'/'. $this->environment .'/cache');
-        file_prepare_directory($cache_dir, FILE_CREATE_DIRECTORY);
+        $cache_dir = 'public://var' . '/'. $this->getName() .'/'. $this->environment .'/cache';
+        file_prepare_directory($cache_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
 
-        return $cache_dir;
+        return drupal_realpath($cache_dir);
     }
 
     /**
@@ -27,10 +27,10 @@ abstract class DrupalEmbeddedKernel extends BaseKernel
      */
     public function getLogDir()
     {
-        $log_dir = drupal_realpath('public://var/' .$this->getName() .'/'. $this->environment .'/logs');
-        file_prepare_directory($log_dir, FILE_CREATE_DIRECTORY);
+        $log_dir = 'public://var' . '/' . $this->getName() .'/'. $this->environment .'/logs';
+        file_prepare_directory($log_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
 
-        return $log_dir;
+        return drupal_realpath($log_dir);
     }
 
     /**
