@@ -86,10 +86,9 @@ function kernel_app($name = 'app') {
       foreach ($info['calls'] as $method => $args) {
         call_user_func_array(array($kernel, $method), $args);
       }
-
-      return $kernel;
     }
   }
+  return $kernel;
 }
 
 /**
