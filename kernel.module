@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Symfony Kernel module
+ */
 
 /**
  * Implements hook_menu().
@@ -15,8 +19,13 @@ function kernel_menu() {
 }
 
 /**
- * @param $name
+ * Returns info about the registered kernels.
+ *
+ * @param string $name
+ *   Kernel name (usually named for the directory)
+ *
  * @return array
+ *   Kernel info
  */
 function kernel_info($name = 'app') {
   // Use the advanced drupal_static() pattern, since this is called very often.
@@ -37,8 +46,13 @@ function kernel_info($name = 'app') {
 }
 
 /**
+ * Returns a kernel object by name.
+ *
  * @param string $name
- * @return \Symfony\Component\HttpKernel\KernelInterface
+ *   Kernel name (usually named for the directory)
+ *
+ * @return \Symfony\Component\HttpKernel\HttpKernelInterface
+ *   A kernel
  */
 function kernel_app($name = 'app') {
   static $kernel;
@@ -100,7 +114,7 @@ function kernel_exit() {
   if ($response && is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
     $router_item = menu_get_item();
     $request = $router_item['page_arguments'][0];
-    /** @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
+    /* @var \Symfony\Component\HttpKernel\TerminableInterface $kernel */
     $kernel->terminate($request, $response);
   }
 }
@@ -113,7 +127,7 @@ function kernel_init() {
   if ($kernel) {
     $kernel->boot();
     $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-    /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
+    /* @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
     $router = $kernel->getContainer()->get('router');
     try {
       $path = current_path();
@@ -127,11 +141,11 @@ function kernel_init() {
         'tab_root' => $path,
         'title' => '',
         'type' => MENU_CALLBACK,
-        'include_file' => drupal_get_path('module', 'kernel') .'/kernel.pages.inc',
+        'include_file' => drupal_get_path('module', 'kernel') . '/kernel.pages.inc',
         'href' => $path,
         'tab_root_href' => $path,
         'tab_parent_href' => '',
-        'access' => true,
+        'access' => TRUE,
         'original_map' => arg(NULL, $path),
         'map' => arg(NULL, $path),
       );
@@ -152,7 +166,9 @@ function kernel_init() {
 }
 
 /**
- * @see drupal_deliver_html_page
+ * Delivers the response and shuts down the kernel and Drupal.
+ *
+ * @see drupal_deliver_html_page()
  */
 function kernel_deliver_response(\Symfony\Component\HttpFoundation\Response $response) {
   $response->send();
