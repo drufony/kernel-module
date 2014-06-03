@@ -99,7 +99,6 @@ function drush_kernel_app_get_options($command = 'list') {
     $contents = file_get_contents($info['console list']);
     $json = json_decode($contents, TRUE);
     $commands = $json['commands'];
-
   }
 
   // Find the available options for the given command and the "help" command.
