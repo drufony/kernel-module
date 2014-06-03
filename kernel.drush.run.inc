@@ -55,9 +55,12 @@ function drush_kernel_app_run($arguments = array()) {
   }
 
   $kernel = kernel_app();
-  $application = new \Symfony\Bundle\FrameworkBundle\Console\Application($kernel);
-  $application->setAutoExit(false);
-  $application->run($input);
+  if (is_a($kernel, 'Symfony\Component\HttpKernel\KernelInterface')) {
+    /** @var $kernel Symfony\Component\HttpKernel\KernelInterface */
+    $application = new \Symfony\Bundle\FrameworkBundle\Console\Application($kernel);
+    $application->setAutoExit(false);
+    $application->run($input);
+  }
 
   // Now that Composer has run, restore the original server arguments.
   $_SERVER['argv'] = $backup;
