@@ -79,9 +79,24 @@ function drush_kernel_app_get_options($command = 'list') {
   // Retrieve all the commands available from Composer.
   if (empty($commands)) {
     $info = kernel_info();
+    if (!file_exists($info['console list'])) {
+      $file = $info['console list'];
+      $kernel = kernel_app();
+      if (is_a($kernel, 'Symfony\\Component\\HttpKernel\\KernelInterface')) {
+        /** @var $kernel Symfony\Component\HttpKernel\KernelInterface */
+        $application = new \Symfony\Bundle\FrameworkBundle\Console\Application($kernel);
+        $output = new \Symfony\Component\Console\Output\StreamOutput(fopen($file, 'a', false));
+        $helper = new \Symfony\Component\Console\Helper\DescriptorHelper();
+        $helper->describe($output, $application, array(
+          'format' => 'json',
+        ));
+      }
+    }
+
     $contents = file_get_contents($info['console list']);
     $json = json_decode($contents, TRUE);
     $commands = $json['commands'];
+
   }
 
   // Find the available options for the given command and the "help" command.
