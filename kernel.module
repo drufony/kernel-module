@@ -57,7 +57,7 @@ function kernel_info($name = 'app') {
 function kernel_app($name = 'app') {
   static $kernel;
   $info = kernel_info($name);
-  if (!$kernel) {
+  if (!$kernel && !empty($info)) {
 
     if (is_array($info['require_once'])) {
       $files = array_filter($info['require_once'], 'file_exists');
