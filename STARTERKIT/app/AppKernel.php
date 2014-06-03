@@ -29,6 +29,7 @@ class AppKernel extends DrupalEmbeddedKernel
 
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
+        $loader->load(DRUPAL_ROOT .'/'. conf_path() .'/parameters.yml');
         $loader->load(__DIR__.'/config/config_'.$this->getEnvironment().'.yml');
     }
 }
