@@ -8,13 +8,14 @@ function hook_kernel_info() {
   $info = array(
     'app' => array(
       'kernel class' => 'AppKernel',
-      'environment' => 'prod',
-      'debug' => false,
+      'arguments' => array('prod', false),
       'calls' => array(
         'loadClassCache' => array(),
       ),
-      'autoload' => $path .'/app/autoload.php',
-      'bootstrap cache' => $path .'/app/bootstrap.php.cache',
+      'require_once' => array(
+        $path .'/app/bootstrap.php.cache',
+        $path .'/app/AppKernel.php',
+      ),
       'console list' => $path .'/app.drush.json',
     ),
   );

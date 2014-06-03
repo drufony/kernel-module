@@ -43,22 +43,39 @@ function kernel_info($name = 'app') {
 function kernel_app($name = 'app') {
   static $kernel;
   $info = kernel_info($name);
-  if ((!$kernel) && (class_exists($info['kernel class']))) {
-    if (file_exists($info['autoload'])) {
-      require_once $info['autoload'];
+  if (!$kernel) {
+
+    if (is_array($info['require_once'])) {
+      $files = array_filter($info['require_once'], 'file_exists');
+      if (!empty($files)) {
+        foreach ($files as $file) {
+          require_once $file;
+        }
+      }
     }
-    if ($info['debug']) {
+
+    if ($info['arguments'][1]) {
       \Symfony\Component\Debug\Debug::enable();
     }
 
-    /** @var \Symfony\Component\HttpKernel\KernelInterface $kernel */
-    $kernel = new $info['kernel class']($info['environment'], $info['debug']);
+    if (class_exists($info['kernel class'])) {
 
-    foreach ($info['calls'] as $method => $args) {
-      call_user_func_array(array($kernel, $method), $args);
+      /* @var \Symfony\Component\HttpKernel\HttpKernelInterface $kernel */
+      if (!empty($info['arguments']) && is_array($info['arguments'])) {
+        $reflect = new ReflectionClass($info['kernel class']);
+        $kernel = $reflect->newInstanceArgs($info['arguments']);
+      }
+      else {
+        $kernel  = new $info['kernel class']();
+      }
+
+      foreach ($info['calls'] as $method => $args) {
+        call_user_func_array(array($kernel, $method), $args);
+      }
+
+      return $kernel;
     }
   }
-  return $kernel;
 }
 
 /**
