@@ -33,17 +33,17 @@ abstract class DrupalEmbeddedKernel extends BaseKernel
         return $log_dir;
     }
 
-  /**
-   * Returns the kernel parameters.
-   *
-   * @return array An array of kernel parameters
-   */
-  protected function getKernelParameters()
-  {
-    $parameters = parent::getKernelParameters();
-    $parameters['kernel.drupal_root'] = DRUPAL_ROOT;
-    $parameters['kernel.conf_path'] = conf_path();
+    /**
+     * Returns the kernel parameters.
+     *
+     * @return array An array of kernel parameters
+     */
+    protected function getKernelParameters()
+    {
+        $parameters = parent::getKernelParameters();
+        $parameters['kernel.drupal_root'] = DRUPAL_ROOT;
+        $parameters['kernel.conf_path'] = conf_path();
 
-    return $parameters;
-  }
+        return $parameters;
+    }
 }
