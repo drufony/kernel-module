@@ -1,0 +1,54 @@
+<?php
+/**
+ * @file
+ * Drupal 7 module (or profile) that injects a Symfony application.
+ */
+
+/**
+ * Implements hook_kernel_info().
+ */
+function STARTERKIT_kernel_info() {
+  $path = drupal_get_path('module', 'STARTERKIT');
+  $info = array(
+    'app' => array(
+      'kernel class' => 'AppKernel',
+      'arguments' => array('dev', TRUE),
+      'calls' => array(
+        'loadClassCache' => array(),
+      ),
+      'require_once' => array(
+        drupal_realpath('public://var') . '/bootstrap.php.cache',
+        DRUPAL_ROOT . '/' . drupal_get_path('module', 'kernel') . '/src/DrupalEmbeddedKernel.inc',
+        DRUPAL_ROOT . '/' . $path . '/app/AppKernel.php',
+      ),
+      'console list' => drupal_realpath('public://var') . '/drush.json',
+    ),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_composer_json_alter().
+ */
+function STARTERKIT_composer_json_alter(&$json) {
+  $path = drupal_get_path('module', 'STARTERKIT');
+
+  // The "STARTERKIT" fills in for the root package.
+  if (file_exists($path . '/composer.json')) {
+
+    // Setting a 'symfony-var-dir' makes this look like a Symfony 3
+    $json['extra']['symfony-app-dir'] = DRUPAL_ROOT . '/' . $path . '/app';
+    $json['extra']['symfony-bin-dir'] = DRUPAL_ROOT . '/' . $path . '/bin';
+    $json['extra']['symfony-web-dir'] = drupal_realpath('public://var') . '/web';
+    $json['extra']['symfony-var-dir'] = drupal_realpath('public://var');
+
+    $json['extra']['incenteev-parameters'] = array(
+      'file' => DRUPAL_ROOT . '/' . conf_path() . '/parameters.yml',
+      'dist-file' => DRUPAL_ROOT . '/' . $path . '/app/config/parameters.yml.dist',
+    );
+
+    module_load_include('inc', 'composer_manager', 'composer_manager.admin');
+    $root_package = composer_manager_read_composer_file($path . '/composer.json');
+    $json['scripts'] = $root_package['scripts'];
+  }
+}
