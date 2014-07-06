@@ -39,7 +39,7 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
 
     drupal_goto($path, array(), $response->getStatusCode());
   }
-  if (0 === stripos($response->headers->get('Content-Type'), 'text/html')) {
+  if ($request->attributes->get('_drupal', false) && 0 === stripos($response->headers->get('Content-Type'), 'text/html')) {
     return $response->getContent();
   }
   else {
