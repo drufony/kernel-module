@@ -92,6 +92,23 @@ function kernel_app($name = 'app') {
 }
 
 /**
+ * @param string $name
+ *
+ * @return \Symfony\Component\DependencyInjection\ContainerInterface
+ */
+function kernel_container($name = 'app') {
+  /** @var \Symfony\Component\DependencyInjection\ContainerInterface $container */
+  static $container;
+  if (!$container) {
+    /** @var Symfony\Component\HttpKernel\KernelInterface $app */
+    $app = kernel_app($name);
+    $app->boot();
+    $container = $app->getContainer();
+  }
+  return $container;
+}
+
+/**
  * Captures the response from the page callback for use in kernel_exit().
  */
 function kernel_response(\Symfony\Component\HttpFoundation\Response $response = NULL) {
