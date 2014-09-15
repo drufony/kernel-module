@@ -7,6 +7,9 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
  */
 abstract class DrupalEmbeddedKernel extends BaseKernel
 {
+
+    const EXTRA_VERSION   = 'drupal';
+
     /**
      * {@inheritdoc}
      *
