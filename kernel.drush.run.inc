@@ -15,7 +15,7 @@ function drush_kernel_app_run($arguments = array()) {
     }
   }
 
-  // Remove any invalid Composer options to construct the final arguments.
+  // Remove any invalid command options to construct the final arguments.
   $options = drush_kernel_app_get_options(isset($arguments[0]) ? $arguments[0] : 'list');
   $args = array('app');
   foreach ($arguments as $argument) {
