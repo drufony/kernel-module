@@ -18,7 +18,7 @@ class DrupalKernelContainer
         if (function_exists($function)) {
           $result = call_user_func_array($function, array($name));
           if (isset($result)) {
-            $providers += (array) $result;
+            $providers = array_merge($providers, (array) $result);
           }
         }
       }
