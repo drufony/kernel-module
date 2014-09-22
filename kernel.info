@@ -3,3 +3,6 @@ core = 7.x
 package = Symfony
 dependencies[] = composer_manager
 files[] = src/DrupalEmbeddedKernel.php
+files[] = src/DrupalKernelContainer.php
+files[] = src/DrupalKernelServiceProvider.php
+files[] = src/DrushKernelServiceProvider.php

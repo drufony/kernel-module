@@ -14,7 +14,9 @@
  *   Drupal response based on Symfony response.
  */
 function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
-  $kernel = kernel_app();
+  $c = \DrupalKernelContainer::get();
+
+  $kernel = $c['kernel'];
   $response = $kernel->handle($request);
   kernel_response($response);
 

@@ -19,6 +19,20 @@ function kernel_menu() {
 }
 
 /**
+ *  Implements hook_service_provider().
+ *
+ * @param string $name
+ *
+ * @return array
+ */
+function kernel_service_provider($name = 'app') {
+  return array(
+    array(new DrupalKernelServiceProvider(), array('kernel.name' => $name)),
+    array(new DrushKernelServiceProvider())
+  );
+}
+
+/**
  * Returns info about the registered kernels.
  *
  * @param string $name
@@ -46,69 +60,6 @@ function kernel_info($name = 'app') {
 }
 
 /**
- * Returns a kernel object by name.
- *
- * @param string $name
- *   Kernel name (usually named for the directory)
- *
- * @return \Symfony\Component\HttpKernel\HttpKernelInterface
- *   A kernel
- */
-function kernel_app($name = 'app') {
-  static $kernel;
-  $info = kernel_info($name);
-  if (!$kernel && !empty($info)) {
-
-    if (is_array($info['require_once'])) {
-      $files = array_filter($info['require_once'], 'file_exists');
-      if (!empty($files)) {
-        foreach ($files as $file) {
-          require_once $file;
-        }
-      }
-    }
-
-    if ($info['arguments'][1]) {
-      \Symfony\Component\Debug\Debug::enable();
-    }
-
-    if (class_exists($info['kernel class'])) {
-
-      /* @var \Symfony\Component\HttpKernel\HttpKernelInterface $kernel */
-      if (!empty($info['arguments']) && is_array($info['arguments'])) {
-        $reflect = new ReflectionClass($info['kernel class']);
-        $kernel = $reflect->newInstanceArgs($info['arguments']);
-      }
-      else {
-        $kernel  = new $info['kernel class']();
-      }
-
-      foreach ($info['calls'] as $method => $args) {
-        call_user_func_array(array($kernel, $method), $args);
-      }
-    }
-  }
-  return $kernel;
-}
-
-/**
- * @param string $name
- *
- * @return \Symfony\Component\DependencyInjection\ContainerInterface
- */
-function kernel_container($name = 'app') {
-  /** @var \Symfony\Component\DependencyInjection\ContainerInterface $container */
-  static $container;
-  if (!$container) {
-    /** @var Symfony\Component\HttpKernel\KernelInterface $app */
-    $app = kernel_app($name);
-    $app->boot();
-    $container = $app->getContainer();
-  }
-  return $container;
-}
-
-/**
  * Captures the response from the page callback for use in kernel_exit().
  */
 function kernel_response(\Symfony\Component\HttpFoundation\Response $response = NULL) {
@@ -125,7 +76,9 @@ function kernel_response(\Symfony\Component\HttpFoundation\Response $response = 
  * Implements hook_exit().
  */
 function kernel_exit() {
-  $kernel = kernel_app();
+  $c = \DrupalKernelContainer::get();
+
+  $kernel = $c['kernel'];
   $response = kernel_response();
   if ($response && is_a($kernel, 'Symfony\Component\HttpKernel\TerminableInterface')) {
     $router_item = menu_get_item();
@@ -139,45 +92,42 @@ function kernel_exit() {
  * Implements hook_init().
  */
 function kernel_init() {
-  $kernel = kernel_app();
-  if ($kernel) {
-    $kernel->boot();
-    $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-    /* @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
-    $router = $kernel->getContainer()->get('router');
-    try {
-      $path = current_path();
-      $router->match(base_path() . $path);
-      $router_item = array(
-        'path' => $path,
-        'page_callback' => 'kernel_callback',
-        'page_arguments' => array($request),
-        'delivery_callback' => '',
-        'tab_parent' => '',
-        'tab_root' => $path,
-        'title' => '',
-        'type' => MENU_CALLBACK,
-        'include_file' => drupal_get_path('module', 'kernel') . '/kernel.pages.inc',
-        'href' => $path,
-        'tab_root_href' => $path,
-        'tab_parent_href' => '',
-        'access' => TRUE,
-        'original_map' => arg(NULL, $path),
-        'map' => arg(NULL, $path),
-      );
+  $c = \DrupalKernelContainer::get();
 
-      // If the desire is to output a whole Symfony response, use:
-      //
+  /* @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
+  $router = $c['router'];
+  try {
+    $path = current_path();
+    $router->match(base_path() . $path);
+    $router_item = array(
+      'path' => $path,
+      'page_callback' => 'kernel_callback',
+      'page_arguments' => array(\Symfony\Component\HttpFoundation\Request::createFromGlobals()),
+      'delivery_callback' => '',
+      'tab_parent' => '',
+      'tab_root' => $path,
+      'title' => '',
+      'type' => MENU_CALLBACK,
+      'include_file' => drupal_get_path('module', 'kernel') . '/kernel.pages.inc',
+      'href' => $path,
+      'tab_root_href' => $path,
+      'tab_parent_href' => '',
+      'access' => TRUE,
+      'original_map' => arg(NULL, $path),
+      'map' => arg(NULL, $path),
+    );
 
-      // $router_item['page_callback'] = array($kernel, 'handle');
-      // $router_item['page_arguments'] = array($request);
-      // $router_item['delivery_callback'] = 'kernel_deliver_response';
+    // If the desire is to output a whole Symfony response, use:
+    //
 
-      menu_set_item(NULL, $router_item);
-    }
-    catch (\Exception $e) {
+    // $router_item['page_callback'] = array($kernel, 'handle');
+    // $router_item['page_arguments'] = array($request);
+    // $router_item['delivery_callback'] = 'kernel_deliver_response';
 
-    }
+    menu_set_item(NULL, $router_item);
+  }
+  catch (\Exception $e) {
+
   }
 }
 
