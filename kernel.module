@@ -99,23 +99,7 @@ function kernel_init() {
   try {
     $path = current_path();
     $router->match(base_path() . $path);
-    $router_item = array(
-      'path' => $path,
-      'page_callback' => 'kernel_callback',
-      'page_arguments' => array(\Symfony\Component\HttpFoundation\Request::createFromGlobals()),
-      'delivery_callback' => '',
-      'tab_parent' => '',
-      'tab_root' => $path,
-      'title' => '',
-      'type' => MENU_CALLBACK,
-      'include_file' => drupal_get_path('module', 'kernel') . '/kernel.pages.inc',
-      'href' => $path,
-      'tab_root_href' => $path,
-      'tab_parent_href' => '',
-      'access' => TRUE,
-      'original_map' => arg(NULL, $path),
-      'map' => arg(NULL, $path),
-    );
+    $router_item = $c['router.transformer']($path);
 
     // If the desire is to output a whole Symfony response, use:
     //

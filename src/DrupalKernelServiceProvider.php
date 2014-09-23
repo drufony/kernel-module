@@ -64,5 +64,30 @@ class DrupalKernelServiceProvider implements ServiceProviderInterface
     $pimple['router'] = function ($c) {
       return $c['container']->get('router');
     };
+    $pimple['router.transformer'] = $pimple->protect(
+    /**
+     * @param $path
+     *
+     * @return array
+     */
+      function ($path) {
+        return array(
+          'path' => $path,
+          'page_callback' => 'kernel_callback',
+          'page_arguments' => array(\Symfony\Component\HttpFoundation\Request::createFromGlobals()),
+          'delivery_callback' => '',
+          'tab_parent' => '',
+          'tab_root' => $path,
+          'title' => '',
+          'type' => MENU_CALLBACK,
+          'include_file' => drupal_get_path('module', 'kernel') . '/kernel.pages.inc',
+          'href' => $path,
+          'tab_root_href' => $path,
+          'tab_parent_href' => '',
+          'access' => TRUE,
+          'original_map' => arg(NULL, $path),
+          'map' => arg(NULL, $path),
+        );
+      });
   }
 }
