@@ -8,7 +8,7 @@
  * Executes the given command in the current working directory.
  */
 function drush_kernel_app_run($arguments = array()) {
-  $c = DrupalKernelContainer::get();
+  $c = pimple_get_container('app');
 
   // Append all the command line options (--option and -o).
   foreach ($_SERVER['argv'] as $argument) {
@@ -70,7 +70,7 @@ function drush_kernel_app_run($arguments = array()) {
  */
 function drush_kernel_app_get_options($command = 'list') {
   static $commands = array();
-  $c = DrupalKernelContainer::get();
+  $c = pimple_get_container('app');
 
   // Retrieve all the commands available from Composer.
   if (empty($commands)) {
