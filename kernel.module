@@ -76,7 +76,7 @@ function kernel_response(\Symfony\Component\HttpFoundation\Response $response = 
  * Implements hook_exit().
  */
 function kernel_exit() {
-  $c = \DrupalKernelContainer::get();
+  $c = pimple_get_container('app');
 
   $kernel = $c['kernel'];
   $response = kernel_response();
@@ -92,7 +92,7 @@ function kernel_exit() {
  * Implements hook_init().
  */
 function kernel_init() {
-  $c = \DrupalKernelContainer::get();
+  $c = pimple_get_container('app');
 
   /* @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
   $router = $c['router'];

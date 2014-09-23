@@ -14,7 +14,7 @@
  *   Drupal response based on Symfony response.
  */
 function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
-  $c = \DrupalKernelContainer::get();
+  $c = pimple_get_container('app');
 
   $kernel = $c['kernel'];
   $response = $kernel->handle($request);
