@@ -4,5 +4,11 @@
     "type": "drupal-module",
     "description": "Symfony Kernel inside a Drupal site",
     "require": {
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "7.0.x-dev"
+        },
+        "installer-name": "kernel"
     }
 }
