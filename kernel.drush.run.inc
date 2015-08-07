@@ -8,6 +8,8 @@
  * Executes the given command in the current working directory.
  */
 function drush_kernel_app_run($arguments = array()) {
+  $c = pimple_get_container('app');
+
   // Append all the command line options (--option and -o).
   foreach ($_SERVER['argv'] as $argument) {
     if ($argument[0] == '-') {
@@ -15,7 +17,7 @@ function drush_kernel_app_run($arguments = array()) {
     }
   }
 
-  // Remove any invalid Composer options to construct the final arguments.
+  // Remove any invalid command options to construct the final arguments.
   $options = drush_kernel_app_get_options(isset($arguments[0]) ? $arguments[0] : 'list');
   $args = array('app');
   foreach ($arguments as $argument) {
@@ -50,14 +52,7 @@ function drush_kernel_app_run($arguments = array()) {
   $env = $input->getParameterOption(array('--env', '-e'), getenv('SYMFONY_ENV') ?: 'dev');
   $debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(array('--no-debug', '')) && $env !== 'prod';
 
-  if ($debug) {
-    \Symfony\Component\Debug\Debug::enable();
-  }
-
-  $kernel = kernel_app();
-  $application = new \Symfony\Bundle\FrameworkBundle\Console\Application($kernel);
-  $application->setAutoExit(false);
-  $application->run($input);
+  $c['console.application']->run($input);
 
   // Now that Composer has run, restore the original server arguments.
   $_SERVER['argv'] = $backup;
@@ -75,10 +70,22 @@ function drush_kernel_app_run($arguments = array()) {
  */
 function drush_kernel_app_get_options($command = 'list') {
   static $commands = array();
+  $c = pimple_get_container('app');
 
   // Retrieve all the commands available from Composer.
   if (empty($commands)) {
     $info = kernel_info();
+    if (!file_exists($info['console list'])) {
+      $file = $info['console list'];
+      /** @var \Symfony\Bundle\FrameworkBundle\Console\Application $application */
+      $application = $c['console.application'];
+      $output = new \Symfony\Component\Console\Output\StreamOutput(fopen($file, 'a', false));
+      $helper = new \Symfony\Component\Console\Helper\DescriptorHelper();
+      $helper->describe($output, $application, array(
+        'format' => 'json',
+      ));
+    }
+
     $contents = file_get_contents($info['console list']);
     $json = json_decode($contents, TRUE);
     $commands = $json['commands'];

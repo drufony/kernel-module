@@ -1,13 +1,22 @@
 <?php
+/**
+ * @file
+ * Symfony Kernel module page callbacks
+ */
 
 /**
- * Page callback that handles a Symfony request
+ * Page callback that handles a Symfony request.
  *
  * @param \Symfony\Component\HttpFoundation\Request $request
+ *   Request object created in hook_init().
+ *
  * @return int|string
+ *   Drupal response based on Symfony response.
  */
 function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
-  $kernel = kernel_app();
+  $c = pimple_get_container('app');
+
+  $kernel = $c['kernel'];
   $response = $kernel->handle($request);
   kernel_response($response);
 
@@ -18,10 +27,21 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
     return MENU_NOT_FOUND;
   }
   if ($response->isRedirection()) {
-    $path = substr($response->headers->get('location'), strlen($GLOBALS['base_url'] . base_path()));
-    drupal_goto($path);
+    $path = $response->headers->get('location');
+
+    // Strip $base_url if it exists.
+    if (0 === strpos($path, $GLOBALS['base_url'])) {
+      $path = substr($path, strlen($GLOBALS['base_url']));
+    }
+
+    // Strip $base_path if it exists.
+    if (0 === strpos($path, base_path())) {
+      $path = substr($path, strlen(base_path()));
+    }
+
+    drupal_goto($path, array(), $response->getStatusCode());
   }
-  if (0 === stripos($response->headers->get('Content-Type'), 'text/html')) {
+  if ($request->attributes->get('_drupal', false) && 0 === stripos($response->headers->get('Content-Type'), 'text/html')) {
     return $response->getContent();
   }
   else {
@@ -34,18 +54,18 @@ function kernel_callback(\Symfony\Component\HttpFoundation\Request $request) {
  * Page callback that maps bundles assets path to conf_path location.
  */
 function kernel_assets_callback() {
-  // @todo Don't hard code assumption about kernel name.
-  $name = 'app';
   $args = func_get_args();
-  array_unshift($args, DRUPAL_ROOT, conf_path(), $name, 'web', 'bundles');
+  array_unshift($args, DRUPAL_ROOT, conf_path(), 'files', 'var', 'web', 'bundles');
 
   // Create a dummy file object so we can use Drupal function to make headers.
-  $file = new stdClass;
+  $file = new stdClass();
   $file->filename = implode('/', $args);
   $file->filemime = file_get_mimetype($file->filename);
   $file->filesize = filesize($file->filename);
 
-  /* @see file_transfer() which can't be used because it requires a stream wrapper and scheme */
+  /* @see file_transfer()
+   *   which can't be used because it requires a stream wrapper and scheme
+   */
   if (ob_get_level()) {
     ob_end_clean();
   }

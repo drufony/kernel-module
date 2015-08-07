@@ -41,13 +41,13 @@ function drush_kernel_app($command = '') {
       '!current' => $current,
     )));
 
-    return false;
+    return FALSE;
   }
 
   // Include the run in a different file so that PHP versions < 5.3 do not fail
   // parsing the file.
-  require_once(dirname(__FILE__) . '/kernel.drush.run.inc');
+  require_once(__DIR__ .'/kernel.drush.run.inc');
 
-  // Run the Composer command using the given function arguments.
+  // Run the console command using the given function arguments.
   return drush_kernel_app_run(func_get_args());
 }

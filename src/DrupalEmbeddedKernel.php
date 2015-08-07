@@ -7,6 +7,8 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
  */
 abstract class DrupalEmbeddedKernel extends BaseKernel
 {
+    const EXTRA_VERSION   = 'drupal';
+
     /**
      * {@inheritdoc}
      *
@@ -14,7 +16,10 @@ abstract class DrupalEmbeddedKernel extends BaseKernel
      */
     public function getCacheDir()
     {
-        return DRUPAL_ROOT .'/'. conf_path().'/'. $this->getName() .'/'. $this->environment .'/cache';
+        $cache_dir = 'public://var'.'/'.$this->getName().'/'.$this->environment.'/cache';
+        file_prepare_directory($cache_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+
+        return drupal_realpath($cache_dir);
     }
 
     /**
@@ -24,20 +29,23 @@ abstract class DrupalEmbeddedKernel extends BaseKernel
      */
     public function getLogDir()
     {
-        return DRUPAL_ROOT .'/'. conf_path().'/'. $this->getName() .'/'. $this->environment .'/logs';
+        $log_dir = 'public://var'.'/'.$this->getName().'/'.$this->environment.'/logs';
+        file_prepare_directory($log_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+
+        return drupal_realpath($log_dir);
     }
 
-  /**
-   * Returns the kernel parameters.
-   *
-   * @return array An array of kernel parameters
-   */
-  protected function getKernelParameters()
-  {
-    $parameters = parent::getKernelParameters();
-    $parameters['kernel.drupal_root'] = DRUPAL_ROOT;
-    $parameters['kernel.conf_path'] = conf_path();
+    /**
+     * Returns the kernel parameters.
+     *
+     * @return array An array of kernel parameters
+     */
+    protected function getKernelParameters()
+    {
+        $parameters = parent::getKernelParameters();
+        $parameters['kernel.drupal_root'] = DRUPAL_ROOT;
+        $parameters['kernel.conf_path'] = conf_path();
 
-    return $parameters;
-  }
+        return $parameters;
+    }
 }
