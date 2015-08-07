@@ -1,5 +1,5 @@
 {
-    "name": "bangpound/kernel-module",
+    "name": "drufony/kernel-module",
     "license": "MIT",
     "type": "drupal-module",
     "description": "Symfony Kernel inside a Drupal site",
