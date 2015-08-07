@@ -3,6 +3,3 @@ core = 7.x
 package = Symfony
 dependencies[] = composer_manager
 dependencies[] = pimple
-files[] = src/DrupalEmbeddedKernel.php
-files[] = src/DrupalKernelServiceProvider.php
-files[] = src/DrushKernelServiceProvider.php

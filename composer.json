@@ -3,7 +3,8 @@
     "license": "MIT",
     "type": "drupal-module",
     "description": "Symfony Kernel inside a Drupal site",
-    "require": {
+    "autoload": {
+        "classmap": ["src"]
     },
     "extra": {
         "branch-alias": {
